@@ -1,4 +1,4 @@
-# from_base($base; $table) - Convert string to number in base and custom digits table.
+# from_base($base; $table) - Convert string to number in base and custom digits table
 #
 # Examples:
 # "baab" | from_base(2; {"a": 0, "b": 1}) -> 9

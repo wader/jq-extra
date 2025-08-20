@@ -2,6 +2,9 @@
 
 Extra builtins for jq.
 
+> [!WARNING]
+> This is mostly a proof of concept at the moment.
+
 ## Install and update
 
 To install first time or update run `make install`:
@@ -32,7 +35,7 @@ $ jq -r gron <<< '{"hello": "world"}'
 - [`gron`](#gron)
 - [`streaks_by(f)`](#streaks_byf)
 - [`streaks`](#streaks)
-#### <a name="from_basebase_table"></a>`from_base($base; $table)` - Convert string to number in base and custom digits table.
+#### <a name="from_basebase_table"></a>`from_base($base; $table)` - Convert string to number in base and custom digits table
 - `"baab" | from_base(2; {"a": 0, "b": 1})` → `9`
 
 #### <a name="from_basebase"></a>`from_base($base)` - Convert string to number in base.
@@ -50,7 +53,7 @@ $ jq -r gron <<< '{"hello": "world"}'
 #### <a name="to_basebase"></a>`to_base($base)` - Convert number to string in base.
 - `255 | to_base(16; "")` → `"0xff"`
 
-#### <a name="chunksize"></a>`chunk($size)` - Split array or string into even chunks.
+#### <a name="chunksize"></a>`chunk($size)` - Split array or string into even chunks
 - `[1,2,3,4,5,6] | chunk(2)` → `[[1, 2], [3, 4], [5, 6]]`
 
 #### <a name="from_duration"></a>`from_duration` - From hh:mm::ss.s to seconds

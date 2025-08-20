@@ -1,4 +1,4 @@
-# chunk($size) - Split array or string into even chunks.
+# chunk($size) - Split array or string into even chunks
 #
 # Examples:
 # [1,2,3,4,5,6] | chunk(2) -> [[1, 2], [3, 4], [5, 6]]
