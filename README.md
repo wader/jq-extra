@@ -26,9 +26,12 @@ $ jq -r gron <<< '{"hello": "world"}'
 - [`to_base($base; prefix; $table)`](#to_basebase_prefix_table)
 - [`to_base($base; prefix)`](#to_basebase_prefix)
 - [`to_base($base)`](#to_basebase)
+- [`chunk($size)`](#chunksize)
 - [`from_duration`](#from_duration)
 - [`to_duration`](#to_duration)
 - [`gron`](#gron)
+- [`streaks_by(f)`](#streaks_byf)
+- [`streaks`](#streaks)
 #### <a name="from_basebase_table"></a>`from_base($base; $table)` - Convert string to number in base and custom digits table.
 - `"baab" | from_base(2; {"a": 0, "b": 1})` → `9`
 
@@ -47,13 +50,16 @@ $ jq -r gron <<< '{"hello": "world"}'
 #### <a name="to_basebase"></a>`to_base($base)` - Convert number to string in base.
 - `255 | to_base(16; "")` → `"0xff"`
 
+#### <a name="chunksize"></a>`chunk($size)` - Split array or string into even chunks.
+- `[1,2,3,4,5,6] | chunk(2)` → `[[1, 2], [3, 4], [5, 6]]`
+
 #### <a name="from_duration"></a>`from_duration` - From hh:mm::ss.s to seconds
 Convert a duration string into seconds.
 - `"01:02:03.45" | from_duration` → `3723.45`
 
 #### <a name="to_duration"></a>`to_duration` - From seconds to hh::mm::ss.s
 Convert seconds into duration string.
-- `3723.45 | to_duration` → `"01:02:03.45" `
+- `3723.45 | to_duration` → `"01:02:03.45"`
 
 #### <a name="gron"></a>`gron` - Output all paths in input as expressions
 Similar to https://github.com/tomnomnom/gron.
@@ -63,6 +69,12 @@ $ jq -r gron <<< '{"a":1}'`
 .a = 1
 ```
 - `{a: [1], b: true} | gron` → `". = {}", ".a = []", ".a[0] = 1", ".b = true"`
+
+#### <a name="streaks_byf"></a>`streaks_by(f)` - Group streaks based on condition
+- `[1,2,3,4,5,6] | chunk(2)` → `[[1, 2], [3, 4], [5, 6]]`
+
+#### <a name="streaks"></a>`streaks` - Group streaks of equal values
+- `[1, 2, 2, 3] | streaks` → `[[1], [2, 2], [3]]`
 
 ## Development
 
