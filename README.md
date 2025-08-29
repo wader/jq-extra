@@ -30,6 +30,8 @@ $ jq -r gron <<< '{"hello": "world"}'
 - [`to_base($base; prefix)`](#to_basebase_prefix)
 - [`to_base($base)`](#to_basebase)
 - [`chunk($size)`](#chunksize)
+- [`count_by(f)`](#count_byf)
+- [`count`](#count)
 - [`from_duration`](#from_duration)
 - [`to_duration`](#to_duration)
 - [`gron`](#gron)
@@ -55,6 +57,13 @@ $ jq -r gron <<< '{"hello": "world"}'
 
 #### <a name="chunksize"></a>`chunk($size)` - Split array or string into even chunks
 - `[1,2,3,4,5,6] | chunk(2)` → `[[1, 2], [3, 4], [5, 6]]`
+
+#### <a name="count_byf"></a>`count_by(f)` - Count unique values in array based on condition
+Similar to `group_by(f)` but counts instead.
+- `[101,201,300] | count_by(. % 10)` → `[[0,1],[1,2]]`
+
+#### <a name="count"></a>`count` - Count unique values in array
+- `["a","b","b","b","c","c"] | count` → `[["a",1],["b",3],["c",2]]`
 
 #### <a name="from_duration"></a>`from_duration` - From hh:mm::ss.s to seconds
 Convert a duration string into seconds.
