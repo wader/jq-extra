@@ -1,13 +1,13 @@
-# streaks_by(f) - Group streaks based on condition
+# runs_by(f) - Group runs of equal values mapped by f
 #
 # Examples:
-# [1,2,3,4,5,6] | chunk(2) -> [[1, 2], [3, 4], [5, 6]]
+# [{a:1,b:2}, {a:2,b:2}, {a:3,b:2}] | runs_by(.b) -> [[{"a":1,"b":2},{"a":2,"b":2},{"a":3,"b":2}]]
 #
 # Tests:
-# streaks_by(.a)
+# runs_by(.a)
 # [{"a":1},{"a":1},{"a":2}]
 # [[{"a":1},{"a":1}],[{"a":2}]]
-def streaks_by(f):
+def runs_by(f):
   ( . as $a
   | length as $l
   | if $l == 0 then []
@@ -36,13 +36,13 @@ def streaks_by(f):
       )
     end
   );
-# streaks - Group streaks of equal values
+# runs - Group runs of equal values
 #
 # Examples:
-# [1, 2, 2, 3] | streaks -> [[1], [2, 2], [3]]
+# [1, 2, 2, 3] | runs -> [[1], [2, 2], [3]]
 #
 # Tests:
-# streaks
+# runs
 # [1, 2, 2, 3]
 # [[1], [2, 2], [3]]
-def streaks: streaks_by(.);
+def runs: runs_by(.);

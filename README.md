@@ -35,8 +35,8 @@ $ jq -r gron <<< '{"hello": "world"}'
 - [`from_duration`](#from_duration)
 - [`to_duration`](#to_duration)
 - [`gron`](#gron)
-- [`streaks_by(f)`](#streaks_byf)
-- [`streaks`](#streaks)
+- [`runs_by(f)`](#runs_byf)
+- [`runs`](#runs)
 #### <a name="from_basebase_table"></a>`from_base($base; $table)` - Convert string to number in base and custom digits table
 - `"baab" | from_base(2; {"a": 0, "b": 1})` → `9`
 
@@ -82,11 +82,11 @@ $ jq -r gron <<< '{"a":1}'`
 ```
 - `{a: [1], b: true} | gron` → `". = {}", ".a = []", ".a[0] = 1", ".b = true"`
 
-#### <a name="streaks_byf"></a>`streaks_by(f)` - Group streaks based on condition
-- `[1,2,3,4,5,6] | chunk(2)` → `[[1, 2], [3, 4], [5, 6]]`
+#### <a name="runs_byf"></a>`runs_by(f)` - Group runs of equal values mapped by f
+- `[{a:1,b:2}, {a:2,b:2}, {a:3,b:2}] | runs_by(.b)` → `[[{"a":1,"b":2},{"a":2,"b":2},{"a":3,"b":2}]]`
 
-#### <a name="streaks"></a>`streaks` - Group streaks of equal values
-- `[1, 2, 2, 3] | streaks` → `[[1], [2, 2], [3]]`
+#### <a name="runs"></a>`runs` - Group runs of equal values
+- `[1, 2, 2, 3] | runs` → `[[1], [2, 2], [3]]`
 
 ## Development
 
