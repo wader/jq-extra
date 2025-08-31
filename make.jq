@@ -77,23 +77,33 @@ def from_defs:
   def _find_def_comments:
     def _cut_by(start; end_):
       foreach .[] as $l (
-        {acc: null, extract: null};
-        if $l | start then
-          ( .extract = null
-          | .acc = [$l]
-          )
-        elif $l | end_ then
-          ( .extract = .acc
-          | .acc = null
-          )
-        elif .acc != null then
-          ( .acc += [$l]
-          )
-        else
-          .extract = null
-        end;
+        { current_line: 0
+        , start_line: 0
+        , lines: null
+        , extract: null
+        };
+        ( .current_line += 1
+        | if $l | start then
+            ( .extract = null
+            | .start_line = .current_line
+            | .lines = [$l]
+            )
+          elif $l | end_ then
+            ( .extract =
+                { start_line
+                , lines
+                }
+            | .lines = null
+            )
+          elif .lines != null then
+            ( .lines += [$l]
+            )
+          else
+            .extract = null
+          end
+        );
         ( .extract
-        | select(length > 0)
+        | select(.lines | length > 0)
         )
       );
     ( split("\n")
@@ -108,31 +118,49 @@ def from_defs:
 
   def _split_by(f):
     foreach (.[], null) as $l (
-      {acc: [], extract: null};
-      if $l | . == null or f then
-        ( .extract = .acc
-        | .acc = []
-        )
-      else
-        ( .extract = null
-        | .acc += [$l]
-        )
-      end;
+      { current_line: 0
+      , start_line: null
+      , lines: []
+      , extract: null
+      };
+      ( .current_line += 1
+      | if .start_line == null then .start_line = .current_line end
+      | if $l | . == null or f then
+          ( .extract =
+              { start_line
+              , lines
+              }
+          | .start_line = null
+          | .lines = []
+          )
+        else
+          ( .extract = null
+          | .lines += [$l]
+          )
+        end
+      );
       ( .extract
       | select(length > 0)
       )
     );
 
-  ( _find_def_comments
+  ( _find_def_comments as {$start_line, $lines}
+  | $lines
   # strip "# "
   | map(.[2:])
   # split into header, example and tests
-  | [_split_by(. == "Examples:" or . == "Tests:")] as [$header, $examples, $tests]
+  | [_split_by(. == "Examples:" or . == "Tests:")] as
+      [ {lines: $header}
+      , {lines: $examples}
+      , {lines: $tests, start_line: $tests_start_line}
+      ]
   | { name: ($header[0] | capture("^(?<n>.*) - .*").n)
     , short: ($header[0] | capture("^.* - (?<s>.*)").s)
     , long: ($header[1:] | map(select(. != "")) | join("\n"))
     , examples: ($examples | map(select(. != "")))
-    , tests: ($tests | join("\n") | from_jqtest)}
+    , tests: ($tests | join("\n") | from_jqtest)
+    , $tests_start_line
+    }
   );
 
 def to_test:
@@ -164,14 +192,19 @@ def to_markdown:
       )
 		);
 
-def jqtest_to_jq:
-  [ .input
-  , " | "
-  , "["
-  , .expr
-  , "]"
-  , " == "
-  , "["
-  , .output[]
-  , "]"
-  ] | join("");
+# jq -L src -nf <(jq -rRs -L .. 'include "make"; from_defs as {$tests_start_line, $tests} | $tests[] | debug | jqtest_to_jq("chunk.jq"; $tests_start_line; ["chunk"])' src/chunk.jq)
+def jqtest_to_jq($name; $line_offset; $includes):
+($includes | map("include \"\(.)\";") | join("\n")) +
+"
+try
+  ( (\(.input) | [\(.expr)]) as $actual
+  | [\(.output | join(", "))] as $expected
+  | if $actual == $expected then
+      \"\($name):\($line_offset + .line): PASS\"
+    else
+      \"\($name):\($line_offset + .line): FAIL: expected \\($expected) got \\($actual)\"
+    end
+  )
+catch
+  \"ERROR\"
+";
