@@ -141,10 +141,18 @@ def to_test:
   , ""
   );
 
-def to_html_anchor: gsub(" "; "_") | gsub("[^A-Za-z0-9_]"; "");
+def to_html_anchor: gsub(" "; "_") | gsub("[^A-Za-z0-9_]"; "_");
 
 def to_markdown:
-		( ( .[]
+		( sort_by(
+        ( .name
+        | [ gsub("^(from_|to_)?(?<n>[A-Za-z_]*).*"; .n)
+          , gsub("^(?<n>[A-Za-z_]*).*"; .n)
+          , length
+          ]
+        )
+      )
+		| ( .[]
       | "- [`\(.name)`](#\(.name | to_html_anchor))"
       )
     , ( .[]

@@ -23,47 +23,47 @@ $ jq -r gron <<< '{"hello": "world"}'
 `make install` includes `src/*.jq` so you can put your own functions in `src/local.jq` for example.
 
 ## Functions
-- [`from_base($base; $table)`](#from_basebase_table)
-- [`from_base($base)`](#from_basebase)
 - [`from_base`](#from_base)
-- [`to_base($base; prefix; $table)`](#to_basebase_prefix_table)
-- [`to_base($base; prefix)`](#to_basebase_prefix)
-- [`to_base($base)`](#to_basebase)
-- [`chunk($size)`](#chunksize)
-- [`count_by(f)`](#count_byf)
+- [`from_base($base)`](#from_base__base_)
+- [`from_base($base; $table)`](#from_base__base___table_)
+- [`to_base($base)`](#to_base__base_)
+- [`to_base($base; prefix)`](#to_base__base__prefix_)
+- [`to_base($base; prefix; $table)`](#to_base__base__prefix___table_)
+- [`chunk($size)`](#chunk__size_)
 - [`count`](#count)
+- [`count_by(f)`](#count_by_f_)
 - [`from_duration`](#from_duration)
 - [`to_duration`](#to_duration)
 - [`gron`](#gron)
-- [`runs_by(f)`](#runs_byf)
 - [`runs`](#runs)
-#### <a name="from_basebase_table"></a>`from_base($base; $table)` - Convert string to number in base and custom digits table
-- `"baab" | from_base(2; {"a": 0, "b": 1})` → `9`
-
-#### <a name="from_basebase"></a>`from_base($base)` - Convert string to number in base.
-- `"ff" | from_base(16)` → `255`
-
+- [`runs_by(f)`](#runs_by_f_)
 #### <a name="from_base"></a>`from_base` - Convert string to number and infer base.
 - `"0xff" | from_base` → `255`
 
-#### <a name="to_basebase_prefix_table"></a>`to_base($base; prefix; $table)` - Convert number to string in base using custom prefix and digits table.
-- `9 | to_base(2; "2#"; "ab")` → `"2#baab"`
+#### <a name="from_base__base_"></a>`from_base($base)` - Convert string to number in base.
+- `"ff" | from_base(16)` → `255`
 
-#### <a name="to_basebase_prefix"></a>`to_base($base; prefix)` - Convert number to string in base using custom prefix.
-- `255 | to_base(16; "")` → `"ff"`
+#### <a name="from_base__base___table_"></a>`from_base($base; $table)` - Convert string to number in base and custom digits table
+- `"baab" | from_base(2; {"a": 0, "b": 1})` → `9`
 
-#### <a name="to_basebase"></a>`to_base($base)` - Convert number to string in base.
+#### <a name="to_base__base_"></a>`to_base($base)` - Convert number to string in base.
 - `255 | to_base(16; "")` → `"0xff"`
 
-#### <a name="chunksize"></a>`chunk($size)` - Split array or string into even chunks
-- `[1,2,3,4,5,6] | chunk(2)` → `[[1, 2], [3, 4], [5, 6]]`
+#### <a name="to_base__base__prefix_"></a>`to_base($base; prefix)` - Convert number to string in base using custom prefix.
+- `255 | to_base(16; "")` → `"ff"`
 
-#### <a name="count_byf"></a>`count_by(f)` - Count unique values in array based on condition
-Similar to `group_by(f)` but counts instead.
-- `[101,201,300] | count_by(. % 10)` → `[[0,1],[1,2]]`
+#### <a name="to_base__base__prefix___table_"></a>`to_base($base; prefix; $table)` - Convert number to string in base using custom prefix and digits table.
+- `9 | to_base(2; "2#"; "ab")` → `"2#baab"`
+
+#### <a name="chunk__size_"></a>`chunk($size)` - Split array or string into even chunks
+- `[1,2,3,4,5,6] | chunk(2)` → `[[1, 2], [3, 4], [5, 6]]`
 
 #### <a name="count"></a>`count` - Count unique values in array
 - `["a","b","b","b","c","c"] | count` → `[["a",1],["b",3],["c",2]]`
+
+#### <a name="count_by_f_"></a>`count_by(f)` - Count unique values in array based on condition
+Similar to `group_by(f)` but counts instead.
+- `[101,201,300] | count_by(. % 10)` → `[[0,1],[1,2]]`
 
 #### <a name="from_duration"></a>`from_duration` - From hh:mm::ss.s to seconds
 Convert a duration string into seconds.
@@ -82,11 +82,11 @@ $ jq -r gron <<< '{"a":1}'`
 ```
 - `{a: [1], b: true} | gron` → `". = {}", ".a = []", ".a[0] = 1", ".b = true"`
 
-#### <a name="runs_byf"></a>`runs_by(f)` - Group runs of equal values mapped by f
-- `[{a:1,b:2}, {a:2,b:2}, {a:3,b:2}] | runs_by(.b)` → `[[{"a":1,"b":2},{"a":2,"b":2},{"a":3,"b":2}]]`
-
 #### <a name="runs"></a>`runs` - Group runs of equal values
 - `[1, 2, 2, 3] | runs` → `[[1], [2, 2], [3]]`
+
+#### <a name="runs_by_f_"></a>`runs_by(f)` - Group runs of equal values mapped by f
+- `[{a:1,b:2}, {a:2,b:2}, {a:3,b:2}] | runs_by(.b)` → `[[{"a":1,"b":2},{"a":2,"b":2},{"a":3,"b":2}]]`
 
 ## Development
 
