@@ -1,4 +1,4 @@
-# runs_by(s; f) - Group runs of equal values mapped by f from stream s
+# runs_by(f; s) - Group runs of equal values mapped by f from stream s
 #
 # Examples:
 # [{a:1,b:1}, {a:2,b:2}, {a:3,b:2}] | runs_by(.[]; .b) -> [[{"a":1,"b":1}], [{"a":2,"b":2},{"a":3,"b":2}]
