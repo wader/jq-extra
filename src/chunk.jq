@@ -1,11 +1,11 @@
-# chunk($size) - Split array or string into even chunks
+# chunks($size; s) - Collect stream s into sized chunks
 #
 # Examples:
-# [1,2,3,4,5,6] | chunk(2) -> [[1, 2], [3, 4], [5, 6]]
+# chunks(2; 1,2,3,4,5,6) -> [1, 2], [3, 4], [5, 6]
 #
 # Tests:
-# .[] as [$input, $size] | $input | chunk($size)
-# [[[], 1], [[], 2], [[1], 1], [[1], 2], [[1,2], 1], [[1,2], 2], [[1,2,3,4], 2], [[1,2,3,4], 3], ["", 1], ["", 2], ["1", 1], ["1", 2], ["12", 1], ["12", 2], ["1234", 2], ["1234", 3]]
+# .[] as [$input, $size] | $input | [chunks($size)]
+# [[[], 1], [[], 2], [[1], 1], [[1], 2], [[1,2], 1], [[1,2], 2], [[1,2,3,4], 2], [[1,2,3,4], 3]]
 # []
 # []
 # [[1]]
@@ -14,24 +14,32 @@
 # [[1,2]]
 # [[1,2],[3,4]]
 # [[1,2,3],[4]]
-# []
-# []
-# ["1"]
-# ["1"]
-# ["1","2"]
-# ["12"]
-# ["12","34"]
-# ["123","4"]
-def chunk($size):
-  if length == 0 then []
-  else
-    [ ( range(
-          ( (length / $size)
-          | ceil
-          | if . == 0 then 1 end
-          )
-        ) as $i
-      | .[$i * $size:($i + 1) * $size]
+def chunks($size; s):
+  foreach ((s | [.]), null) as $v (
+    {acc: null, extract: null};
+    if $v == null then .extract = .acc
+    elif .acc == null then .acc = [$v[0]]
+    elif .acc | length < $size then
+      ( .extract = null
+      | .acc += [$v[0]]
       )
-    ]
-  end;
+    else
+      ( .extract = .acc
+      | .acc = [$v[0]]
+      )
+    end;
+    .extract | values
+  );
+
+# chunks($size) - Split array into sized chunks
+#
+# Examples:
+# [1,2,3,4,5,6] | chunks(2) -> [1, 2], [3, 4], [5, 6]
+#
+# Tests:
+# chunks(2) 
+# [1,2,3,4,5,6]
+# [1,2]
+# [3,4]
+# [5,6]
+def chunks($size): chunks($size; .[]);
