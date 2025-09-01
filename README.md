@@ -37,6 +37,7 @@ $ jq -r gron <<< '{"hello": "world"}'
 - [`gron`](#gron)
 - [`runs`](#runs)
 - [`runs_by(f)`](#runs_by_f_)
+- [`runs_by(s; f)`](#runs_by_s__f_)
 #### <a name="from_base"></a>`from_base` - Convert string to number and infer base.
 - `"0xff" | from_base` → `255`
 
@@ -83,10 +84,13 @@ $ jq -r gron <<< '{"a":1}'`
 - `{a: [1], b: true} | gron` → `". = {}", ".a = []", ".a[0] = 1", ".b = true"`
 
 #### <a name="runs"></a>`runs` - Group runs of equal values
-- `[1, 2, 2, 3] | runs` → `[[1], [2, 2], [3]]`
+- `[1, 2, 2, 3] | runs` → `[1], [2, 2], [3]`
 
 #### <a name="runs_by_f_"></a>`runs_by(f)` - Group runs of equal values mapped by f
-- `[{a:1,b:2}, {a:2,b:2}, {a:3,b:2}] | runs_by(.b)` → `[[{"a":1,"b":2},{"a":2,"b":2},{"a":3,"b":2}]]`
+- `[1, 2, 2.4, 3] | runs_by(floor)` → `[1], [2, 2.4], [3]`
+
+#### <a name="runs_by_s__f_"></a>`runs_by(s; f)` - Group runs of equal values mapped by f from stream s
+- `[{a:1,b:1}, {a:2,b:2}, {a:3,b:2}] | runs_by(.[]; .b)` → `[[{"a":1,"b":1}], [{"a":2,"b":2},{"a":3,"b":2}]`
 
 ## Development
 
