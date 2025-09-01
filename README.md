@@ -29,7 +29,8 @@ $ jq -r gron <<< '{"hello": "world"}'
 - [`to_base($base)`](#to_base__base_)
 - [`to_base($base; prefix)`](#to_base__base__prefix_)
 - [`to_base($base; prefix; $table)`](#to_base__base__prefix___table_)
-- [`chunk($size)`](#chunk__size_)
+- [`chunks($size)`](#chunks__size_)
+- [`chunks($size; s)`](#chunks__size__s_)
 - [`count`](#count)
 - [`count_by(f)`](#count_by_f_)
 - [`from_duration`](#from_duration)
@@ -56,8 +57,11 @@ $ jq -r gron <<< '{"hello": "world"}'
 #### <a name="to_base__base__prefix___table_"></a>`to_base($base; prefix; $table)` - Convert number to string in base using custom prefix and digits table.
 - `9 | to_base(2; "2#"; "ab")` → `"2#baab"`
 
-#### <a name="chunk__size_"></a>`chunk($size)` - Split array or string into even chunks
-- `[1,2,3,4,5,6] | chunk(2)` → `[[1, 2], [3, 4], [5, 6]]`
+#### <a name="chunks__size_"></a>`chunks($size)` - Split array into sized chunks
+- `[1,2,3,4,5,6] | chunks(2)` → `[1, 2], [3, 4], [5, 6]`
+
+#### <a name="chunks__size__s_"></a>`chunks($size; s)` - Collect stream s into sized chunks
+- `chunks(2; 1,2,3,4,5,6)` → `[1, 2], [3, 4], [5, 6]`
 
 #### <a name="count"></a>`count` - Count unique values in array
 - `["a","b","b","b","c","c"] | count` → `[["a",1],["b",3],["c",2]]`
