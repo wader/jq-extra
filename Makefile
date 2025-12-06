@@ -17,15 +17,13 @@ install:
 	@echo "Rebuilding .jq"
 	@cat ${JQ_FILES} > .jq
 
-# run jq with $HOME/.jq pointing to echo test file so that the functions will
+# prepend include statement(s) before test expression to so that the functions will
 # be available in the tests
-TMP_HOME:=$(shell mktemp -d)
 %.test: %.jq
-	@mkdir -p "${TMP_HOME}"
-	@ln -sf "${PWD}/$<" "${TMP_HOME}/.jq"
-	@jq -rRs -L .. 'include "make"; from_defs | to_test' $< | \
+	@printf "Tests for %s:\n" $<
+	@jq --arg includes "$<" -rRs 'include "make"; from_defs | to_test' $< | \
 		HOME=${TMP_HOME} jq --run-tests
-	@rm -rf "${TMP_HOME}"
+	@printf '\n'
 
 .PHONY: README.md
 README.md: make.jq ${JQ_FILES}
