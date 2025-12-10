@@ -7,87 +7,65 @@
 # ...
 # <next test>
 def from_jqtest:
+  def emit:
+    ( .emit =
+        { expr
+        , nr
+        , line
+        , input
+        , output
+        , fail
+        , error
+        , comments
+        }
+    )
+  ;
   [ foreach (split("\n")[], null) as $l (
-      { current_line: 0
-      , nr: 1
-      , emit: true
+      { emit: true
+      , nr: 0
+      , current_line: 0
       , comments: []
       };
       ( .current_line += 1
       | if .emit then
-          ( .expr = null
-          | .input = null
-          | .output = []
-          | .fail = null
-          | .emit = null
-          | .error = null
+          ( .emit     = null
+          | .expr     = null
+          | .nr      += 1
+          | .input    = null
+          | .output   = []
+          | .fail     = null
+          | .error    = null
           | .comments = []
           )
         else .
         end
-      # | debug(["line", .])
       | if $l then
-          if $l | test("^\\s*#") then .comments += [$l]
+          ( if $l | test("^\\s*#") then .comments += [$l]
           elif $l | test("^\\s*$") then
-            if .expr then
-              ( .emit =
-                  { line
-                  , nr
-                  , expr
-                  , input
-                  , output
-                  , fail
-                  , error
-                  , comments
-                  }
-              | .nr += 1
-              )
+            ( if .expr
+            then  emit
             else .comments += ["#"]
             end
-          elif $l | test("^\\s*%%FAIL") then
-            .fail = $l
-          else
-            if .expr == null then
-              ( .line = .current_line
-              | .expr = $l
-              )
-            elif .fail and .error == null then .error = $l
-            elif .input == null then .input = $l
-            else .output += [$l]
-            end
+            )
+          elif $l | test("^\\s*%%FAIL") then .fail = $l
+          elif .expr == null then
+            ( .expr = $l
+            | .line = .current_line
+            )
+          elif .fail and .error == null then .error   =  $l
+          elif           .input == null then .input   =  $l
+          else                               .output += [$l]
           end
-        else
-          if .expr then
-            ( .emit =
-                { line
-                , nr
-                , expr
-                , input
-                , output
-                , fail
-                , error
-                , comments
-                }
-            | .nr += 1
-            )
-          elif .comments | length != 0 then
-            ( .emit =
-                { line
-                , nr
-                , expr
-                , input
-                , output
-                , fail
-                , error
-                , comments
-                }
-            )
+          )
+        else # final step: emit a final test/trailing comments
+          ( if .expr or (.comments | length != 0)
+          then emit
           else empty
           end
+          )
         end
       );
-      select(.emit)
-      # | debug(["output", .])
+      select(.emit) | .emit
     )
   ];
 
@@ -109,53 +87,47 @@ def from_jqtest:
 def from_defs:
   def _find_def_comments:
     def _cut_by(start; end_):
+      def emit($type): 
+        if .lines | length != 0 then
+          .emit = 
+            { start_line
+            , lines
+            , $type
+            , is_compressed,
+            }
+        else .
+        end
+      ;
+
       foreach (.[], null) as $l (
-        { current_line: 0
-        , start_line: 0
-        , lines: null
-        , extract: null
-        , is_compressed: false,
+        { emit:          true
+        , current_line:  0
         };
-        ( .current_line += 1
+        ( .current_line   += 1
+        | if .emit then
+          ( .emit          = null
+          | .start_line    = .current_line
+          )
+          else .
+          end
         | if $l then
             if $l | start then
-              ( .extract =
-                  { start_line
-                  , lines
-                  , type: "other"
-                  , is_compressed,
-                  }
-              | .start_line = .current_line
+              ( emit("other")
               | .lines = [$l]
               )
             elif $l | end_ then
-              ( .extract =
-                  { start_line
-                  , lines
-                  , type: "def"
-                  }
+              ( emit("def")
+              | .start_line    = .current_line
               | .is_compressed = (.lines[-1] | test("^#\\s*$") | not)
-              | .start_line = .current_line
-              | .lines = [$l]
+              | .lines         = [$l]
               )
-            else
-              ( .lines  += [$l]
-              | .extract = null
-              )
+            else .lines       += [$l]
             end
-          else 
-            ( .extract =
-              { start_line
-              , lines
-              , type: "other"
-              , is_compressed,
-              }
-            )
+          else emit("other")
           end
         );
-        ( .extract
-        | select(.lines)
-        # | debug(["line block", .])
+        ( select(.emit)
+        | .emit
         )
       );
     ( split("\n")
@@ -173,12 +145,12 @@ def from_defs:
       { current_line: 0
       , start_line: null
       , lines: []
-      , extract: null
+      , emit: null
       };
       ( .current_line += 1
       | if .start_line == null then .start_line = .current_line end
       | if $l | . == null or f then
-          ( .extract =
+          ( .emit =
               { start_line
               , lines
               }
@@ -186,13 +158,13 @@ def from_defs:
           | .lines = []
           )
         else
-          ( .extract = null
+          ( .emit = null
           | .lines += [$l]
           )
         end
       );
-      ( .extract
-      | select(length > 0)
+      ( select(.emit)
+      | .emit
       )
     );
 
