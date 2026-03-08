@@ -97,7 +97,8 @@ $ jq -r gron <<< '{"a":1}'`
 - `[1, 2, 2.4, 3] | runs_by(floor)` → `[1], [2, 2.4], [3]`
 
 #### <a name="runs_by_f__s_"></a>`runs_by(f; s)` - Group runs of equal values mapped by f from stream s
-- `[{a:1,b:1}, {a:2,b:2}, {a:3,b:2}] | runs_by(.[]; .b)` → `[[{"a":1,"b":1}], [{"a":2,"b":2},{"a":3,"b":2}]`
+- `runs_by(.; 1,2,2,3)` → `[1], [2, 2], [3]`
+- `[{a:1,b:1}, {a:2,b:2}, {a:3,b:2}] | runs_by(.b; .[])` → `[[{"a":1,"b":1}], [{"a":2,"b":2},{"a":3,"b":2}]`
 
 #### <a name="from_uri"></a>`from_uri` - Parse URI from string into an object
 Implements `rfc3986`: Uniform Resource Identifier (URI): Generic Syntax
