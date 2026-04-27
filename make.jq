@@ -146,6 +146,7 @@ def from_defs:
       , start_line: null
       , lines: []
       , emit: null
+      , delimiter: null
       };
       ( .current_line += 1
       | if .start_line == null then .start_line = .current_line end
@@ -153,9 +154,11 @@ def from_defs:
           ( .emit =
               { start_line
               , lines
+              , delimiter
               }
           | .start_line = null
           | .lines = []
+          | .delimiter = $l
           )
         else
           ( .emit = null
@@ -173,22 +176,21 @@ def from_defs:
       ( $lines
       # strip "# "
       | map(.[2:])
-      # split into header, example and tests
-      | [_split_by(. == "Examples:" or . == "Tests:")] as
-          [ {lines: $header}
-          , {lines: $examples}
-          , {lines: $tests, start_line: $tests_start_line}
-          ]
-      | { name: ($header[0] | capture("^(?<n>.*) - .*").n)
-        , short: ($header[0] | capture("^.* - (?<s>.*)").s)
-        , header_raw: $header[0]
-        , long: ($header[1:] | map(select(. != "")) | join("\n"))
-        , long_raw: $header[1:]
-        , examples: ($examples | map(select(. != "")))
-        , examples_raw: $examples
-        , tests: ($tests |  join("\n") | from_jqtest)
-        , tests_raw: $tests
-        , $tests_start_line
+      # split into header, optional examples and optional tests
+      | [_split_by(. == "Examples:" or . == "Tests:")] as $sections
+      | ($sections | map(select(.delimiter == null))     | first // {lines: []})              as $header_section
+      | ($sections | map(select(.delimiter == "Examples:")) | first // {lines: []})           as $examples_section
+      | ($sections | map(select(.delimiter == "Tests:"))    | first // {lines: [], start_line: 0}) as $tests_section
+      | { name: ($header_section.lines[0] | capture("^(?<n>.*) - .*").n)
+        , short: ($header_section.lines[0] | capture("^.* - (?<s>.*)").s)
+        , header_raw: $header_section.lines[0]
+        , long: ($header_section.lines[1:] | map(select(. != "")) | join("\n"))
+        , long_raw: $header_section.lines[1:]
+        , examples: ($examples_section.lines | map(select(. != "")))
+        , examples_raw: $examples_section.lines
+        , tests: ($tests_section.lines | join("\n") | from_jqtest)
+        , tests_raw: $tests_section.lines
+        , tests_start_line: $tests_section.start_line
         , type: "def"
         }
       )

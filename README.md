@@ -39,6 +39,8 @@ $ jq -r gron <<< '{"hello": "world"}'
 - [`runs`](#runs)
 - [`runs_by(f)`](#runs_by_f_)
 - [`runs_by(f; s)`](#runs_by_f__s_)
+- [`table`](#table)
+- [`table($opts)`](#table__opts_)
 - [`from_uri`](#from_uri)
 - [`to_uri`](#to_uri)
 - [`with_uri(f)`](#with_uri_f_)
@@ -99,6 +101,36 @@ $ jq -r gron <<< '{"a":1}'`
 #### <a name="runs_by_f__s_"></a>`runs_by(f; s)` - Group runs of equal values mapped by f from stream s
 - `runs_by(.; 1,2,2,3)` → `[1], [2, 2], [3]`
 - `[{a:1,b:1}, {a:2,b:2}, {a:3,b:2}] | runs_by(.b; .[])` → `[[{"a":1,"b":1}], [{"a":2,"b":2},{"a":3,"b":2}]`
+
+#### <a name="table"></a>`table` - Format array of objects as a text table
+Keys become column headers, sorted alphabetically.
+String values are left aligned, number values are right aligned,
+other value types are formatted as JSON and left aligned.
+Missing keys are shown as empty cells.
+```sh
+$ echo '[{"name":"Alice","age":30},{"name":"Bob","age":25}]' | jq -r 'table'
+age  name
+---  -----
+ 30  Alice
+ 25  Bob
+```
+
+
+#### <a name="table__opts_"></a>`table($opts)` - Format array of objects as a text table with options
+Keys become column headers, sorted alphabetically.
+String values are left aligned, number values are right aligned,
+other value types are formatted as JSON and left aligned.
+Missing keys are shown as empty cells.
+Options:
+  index: string  Add a leading column with this name containing the 0-based row index
+```sh
+$ echo '[{"name":"Alice","age":30},{"name":"Bob","age":25}]' | jq -r 'table({index:"row"})'
+row  age  name
+---  ---  -----
+  0   30  Alice
+  1   25  Bob
+```
+
 
 #### <a name="from_uri"></a>`from_uri` - Parse URI from string into an object
 Implements `rfc3986`: Uniform Resource Identifier (URI): Generic Syntax
